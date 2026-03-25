@@ -17,6 +17,7 @@ public class Task {
     private String title;
     private TaskStatus status;
     private User owner;
+    private int estimatedEffort;
 
     public Task(String title, LocalDate deadline) {
         this.id = nextId++;
@@ -33,8 +34,17 @@ public class Task {
      * Regra: Só é possível se houver um owner atribuído e não estiver BLOCKED.
      */
     public void moveToInProgress(User user) {
-        // TODO: Implementar lógica de proteção e atualizar activeWorkload
-        // Se falhar, incrementar totalValidationErrors e lançar NexusValidationException
+        if (this.owner != null && this.status != TaskStatus.BLOCKED) {
+            this.status = TaskStatus.IN_PROGRESS;
+            return;
+        }
+
+        String message = "Tarefas sem dono não podem ser marcadas como em progresso.";
+        if (this.status == TaskStatus.BLOCKED) {
+            message = "Tarefas bloqueadas não podem ser marcadas como em progresso.";
+        }
+
+        throw new NexusValidationException(message);
     }
 
     /**
@@ -42,11 +52,19 @@ public class Task {
      * Regra: Só pode ser movida para DONE se não estiver BLOCKED.
      */
     public void markAsDone() {
-        // TODO: Implementar lógica de proteção e atualizar activeWorkload (decrementar)
+        if (this.status != TaskStatus.BLOCKED) {
+            this.status = TaskStatus.DONE;
+            return;
+        }
+
+        throw new NexusValidationException("Tarefas bloqueadas não podem ser marcadas como concluídas.");
     }
 
     public void setBlocked(boolean blocked) {
         if (blocked) {
+            if (this.status == TaskStatus.DONE) {
+                throw new NexusValidationException("Tarefas concluídas não podem ser marcadas como bloqueadas.");
+            }
             this.status = TaskStatus.BLOCKED;
         } else {
             this.status = TaskStatus.TO_DO; // Simplificação para o Lab
@@ -59,28 +77,15 @@ public class Task {
     public String getTitle() { return title; }
     public LocalDate getDeadline() { return deadline; }
     public User getOwner() { return owner; }
+    public int getEstimatedEffort() { return estimatedEffort; }
 
-    // Setters
-    public void setStatus(TaskStatus status) {
-        boolean valid = true;
-        switch (status) {
-            case IN_PROGRESS:
-                valid = this.owner != null;   
-                break;
-            case DONE:
-                valid = this.status != TaskStatus.BLOCKED;
-                break;
-            case BLOCKED:
-                valid = this.status != TaskStatus.DONE;
-            default:
-                break;
-        }
-            
-        if (!valid) {
-            totalValidationErrors++;
-            throw new NexusValidationException("Erro ao mudar status da tarefa " + this.title + ": " + this.status.name() + " -> " + status.name());
-        }
-
-        this.status = status;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+    public void setEstimatedEffort(int estimatedEffort) {
+        this.estimatedEffort = estimatedEffort;
     }
 }
