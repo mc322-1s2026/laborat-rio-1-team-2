@@ -5,6 +5,7 @@ import com.nexus.exception.NexusValidationException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public class LogProcessor {
 
@@ -38,9 +39,47 @@ public class LogProcessor {
                                 workspace.addTask(t);
                                 System.out.println("[LOG] Tarefa criada: " + p[1]);
                             }
-                            default -> System.err.println("[WARN] Ação desconhecida: " + action);
+                            case "CREATE_PROJECT" -> {
+                                Project project = new Project(p[1], Integer.parseInt(p[2]));
+                                workspace.addProject(project);
+                                System.out.println("[LOG] Projeto criado: " + p[1]);
+                            }
+                            case "ASSIGN_USER" -> {
+                                Task t = workspace.getTaskById(Integer.parseInt(p[2]));
+                                User u = getUserByUsername(users, content);
+                                if (t == null || u == null) {
+                                    throw new NexusValidationException("tarefa ou usuário desconhecidos.");
+                                }
+
+                                t.setOwner(u);
+                            }
+                            case "CHANGE_STATUS" -> {
+                                Task t = workspace.getTaskById(Integer.parseInt(p[1]));
+
+                                switch (p[2]) {
+                                    case "IN_PROGRESS":
+                                        t.moveToInProgress(null);
+                                        break;
+                                    case "DONE":
+                                        t.markAsDone();
+                                        break;
+                                    case "BLOCKED":
+                                        t.setBlocked(true);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            case "REPORT_STATUS" -> {
+                                
+                            }
+
+                            default -> {
+                                System.err.println("[WARN] Ação desconhecida: " + action);
+                            }
                         }
                     } catch (NexusValidationException e) {
+                        Task.totalValidationErrors++;
                         System.err.println("[ERRO DE REGRAS] Falha no comando '" + line + "': " + e.getMessage());
                     }
                 }
@@ -48,5 +87,13 @@ public class LogProcessor {
         } catch (IOException e) {
             System.err.println("[ERRO FATAL] " + e.getMessage());
         }
+    }
+
+    private User getUserByUsername(List<User> users, String username) {
+        Optional<User> user = users.stream()
+            .filter(u -> u.consultUsername() == username)
+            .findFirst();
+        
+        return user.orElse(null);
     }
 }
