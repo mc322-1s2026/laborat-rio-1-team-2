@@ -12,6 +12,7 @@ public class User {
         this.email = email;
     }
 
+
     public String consultEmail() {
         return email;
     }
@@ -21,6 +22,9 @@ public class User {
     }
 
     public long calculateWorkload() {
-        return 0; 
+        return tasks.stream()
+            .filter(t -> this.equals(t.getOwner()))
+            .filter(t -> t.getStatus() == TaskStatus.IN_PROGRESS)
+            .count();
     }
 }
