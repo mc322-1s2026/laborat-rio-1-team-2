@@ -4,6 +4,10 @@ import java.time.LocalDate;
 
 import com.nexus.exception.NexusValidationException;
 
+/**
+ * Representa uma tarefa no sistema, com atributos como título, prazo, status e proprietário.
+ * Inclui métricas globais para rastreamento de tarefas criadas, erros de validação e carga de trabalho ativa.
+ */
 public class Task {
     // Métricas Globais (Alunos implementam a lógica de incremento/decremento)
     public static int totalTasksCreated = 0;
@@ -19,6 +23,14 @@ public class Task {
     private User owner;
     private int estimatedEffort;
 
+    /**
+     * Cria uma nova tarefa com o título, prazo e esforço estimado especificados.
+     * O status inicial é TO_DO e o ID é gerado automaticamente.
+     *
+     * @param title o título da tarefa
+     * @param deadline o prazo da tarefa
+     * @param estimatedEffort o esforço estimado em horas
+     */
     public Task(String title, LocalDate deadline, int estimatedEffort) {
         this.id = nextId++;
         this.deadline = deadline;
@@ -61,6 +73,13 @@ public class Task {
         throw new NexusValidationException("Tarefas bloqueadas não podem ser marcadas como concluídas.");
     }
 
+    /**
+     * Define se a tarefa está bloqueada ou não.
+     * Se bloqueada, o status muda para BLOCKED; caso contrário, volta para TO_DO.
+     *
+     * @param blocked true para bloquear a tarefa, false para desbloquear
+     * @throws NexusValidationException se tentar bloquear uma tarefa concluída
+     */
     public void setBlocked(boolean blocked) {
         if (blocked) {
             if (this.status == TaskStatus.DONE) {
@@ -73,19 +92,64 @@ public class Task {
     }
 
     // Getters
+    /**
+     * Retorna o ID único da tarefa.
+     *
+     * @return o ID da tarefa
+     */
     public int getId() { return id; }
+    /**
+     * Retorna o status atual da tarefa.
+     *
+     * @return o status da tarefa
+     */
     public TaskStatus getStatus() { return status; }
+    /**
+     * Retorna o título da tarefa.
+     *
+     * @return o título da tarefa
+     */
     public String getTitle() { return title; }
+    /**
+     * Retorna o prazo da tarefa.
+     *
+     * @return o prazo da tarefa
+     */
     public LocalDate getDeadline() { return deadline; }
+    /**
+     * Retorna o proprietário da tarefa.
+     *
+     * @return o proprietário da tarefa
+     */
     public User getOwner() { return owner; }
+    /**
+     * Retorna o esforço estimado da tarefa em horas.
+     *
+     * @return o esforço estimado
+     */
     public int getEstimatedEffort() { return estimatedEffort; }
 
+    /**
+     * Define o título da tarefa.
+     *
+     * @param title o novo título da tarefa
+     */
     public void setTitle(String title) {
         this.title = title;
     }
+    /**
+     * Define o proprietário da tarefa.
+     *
+     * @param owner o novo proprietário da tarefa
+     */
     public void setOwner(User owner) {
         this.owner = owner;
     }
+    /**
+     * Define o esforço estimado da tarefa em horas.
+     *
+     * @param estimatedEffort o novo esforço estimado
+     */
     public void setEstimatedEffort(int estimatedEffort) {
         this.estimatedEffort = estimatedEffort;
     }

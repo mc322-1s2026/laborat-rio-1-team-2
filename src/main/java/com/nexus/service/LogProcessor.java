@@ -7,8 +7,20 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Processa logs de comandos para gerenciar usuários, tarefas e projetos no espaço de trabalho.
+ * Lê um arquivo de log e executa ações baseadas nos comandos encontrados.
+ */
 public class LogProcessor {
 
+    /**
+     * Processa o arquivo de log especificado, executando comandos para criar usuários, tarefas, projetos,
+     * atribuir usuários a tarefas e alterar status de tarefas.
+     *
+     * @param fileName o nome do arquivo de log a ser processado
+     * @param workspace o espaço de trabalho onde as ações serão executadas
+     * @param users a lista de usuários existentes
+     */
     public void processLog(String fileName, Workspace workspace, List<User> users) {
         try {
             // Busca o arquivo dentro da pasta de recursos do projeto (target/classes)
@@ -104,6 +116,13 @@ public class LogProcessor {
         }
     }
 
+    /**
+     * Busca um usuário pelo nome de usuário na lista fornecida.
+     *
+     * @param users a lista de usuários
+     * @param username o nome de usuário a buscar
+     * @return o usuário encontrado ou null se não existir
+     */
     private User getUserByUsername(List<User> users, String username) {
         Optional<User> user = users.stream()
             .filter(u -> u.consultUsername().equals(username))
