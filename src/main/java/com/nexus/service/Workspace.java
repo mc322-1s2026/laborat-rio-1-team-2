@@ -2,10 +2,14 @@ package com.nexus.service;
 
 import com.nexus.model.Project;
 import com.nexus.model.Task;
+import com.nexus.model.TaskStatus;
+import com.nexus.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.Collections;
 
 public class Workspace {
@@ -29,12 +33,20 @@ public class Workspace {
         return Collections.unmodifiableList(projects);
     }
 
-    public Task getTaskById(int id) {
-        Optional<Task> filteredTasks = tasks.stream()
-            .filter(task -> task.getId() == id)
+    public Project getProjectByName(String name) {
+        Optional<Project> project = projects.stream()
+            .filter(p -> p.getNome().equals(name))
             .findFirst();
         
-        return filteredTasks.orElse(null);
+        return project.orElse(null); 
+    }
+
+    public Task getTaskById(int id) {
+        Optional<Task> task = tasks.stream()
+            .filter(t -> t.getId() == id)
+            .findFirst();
+        
+        return task.orElse(null);
     }
     public List<User> getTopPerformers() {
         return tasks.stream()
@@ -54,11 +66,11 @@ public class Workspace {
     }
 
     public double getProjectHealth(Project project) {
-        long total = project.getTasks().size();
+        long total = project.getTaskList().size();
 
         if (total == 0) return 0;
 
-        long done = project.getTasks().stream()
+        long done = project.getTaskList().stream()
             .filter(t -> t.getStatus() == TaskStatus.DONE)
             .count();
 

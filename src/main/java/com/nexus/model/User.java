@@ -1,5 +1,7 @@
 package com.nexus.model;
 
+import java.util.List;
+
 public class User {
     private final String username;
     private final String email;
@@ -21,7 +23,7 @@ public class User {
         return username;
     }
 
-    public long calculateWorkload() {
+    public long calculateWorkload(List<Task> tasks) {
         return tasks.stream()
             .filter(t -> this.equals(t.getOwner()))
             .filter(t -> t.getStatus() == TaskStatus.IN_PROGRESS)
