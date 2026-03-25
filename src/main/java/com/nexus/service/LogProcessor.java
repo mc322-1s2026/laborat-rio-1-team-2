@@ -35,8 +35,12 @@ public class LogProcessor {
                                 System.out.println("[LOG] Usuário criado: " + p[1]);
                             }
                             case "CREATE_TASK" -> {
-                                Task t = new Task(p[1], LocalDate.parse(p[2]));
+                                Task t = new Task(p[1], LocalDate.parse(p[2]), Integer.parseInt(p[3]));
                                 workspace.addTask(t);
+
+                                Project project = workspace.getProjectByName(p[4]);
+                                project.addTask(t);
+
                                 System.out.println("[LOG] Tarefa criada: " + p[1]);
                             }
                             case "CREATE_PROJECT" -> {
@@ -45,13 +49,14 @@ public class LogProcessor {
                                 System.out.println("[LOG] Projeto criado: " + p[1]);
                             }
                             case "ASSIGN_USER" -> {
-                                Task t = workspace.getTaskById(Integer.parseInt(p[2]));
-                                User u = getUserByUsername(users, content);
+                                Task t = workspace.getTaskById(Integer.parseInt(p[1]));
+                                User u = getUserByUsername(users, p[2]);
                                 if (t == null || u == null) {
                                     throw new NexusValidationException("tarefa ou usuário desconhecidos.");
                                 }
 
                                 t.setOwner(u);
+                                System.out.println("[LOG] Usuario atribuido à tarefa: " + t.getTitle());
                             }
                             case "CHANGE_STATUS" -> {
                                 Task t = workspace.getTaskById(Integer.parseInt(p[1]));
@@ -69,9 +74,17 @@ public class LogProcessor {
                                     default:
                                         break;
                                 }
+
+                                System.out.println("[LOG] Tarefa teve o estado alterado para: " + p[1]);
                             }
                             case "REPORT_STATUS" -> {
+                                System.out.print("[LOG] Top Performers: ");
+                                workspace.getTopPerformers().stream().forEach(u -> System.out.println(u.consultUsername()));
                                 
+                                System.out.print("\n[LOG] Usuários Sobrecarregados: ");
+                                workspace.getOverloadedUsers(users).stream().forEach(u -> System.out.println(u.consultUsername()));
+                                
+                                System.out.print("\n[LOG] Global Bottlenecks: " + workspace.getGlobalBottleneck().name() + "\n");
                             }
 
                             default -> {
@@ -81,6 +94,8 @@ public class LogProcessor {
                     } catch (NexusValidationException e) {
                         Task.totalValidationErrors++;
                         System.err.println("[ERRO DE REGRAS] Falha no comando '" + line + "': " + e.getMessage());
+                    } catch (Exception e) {
+                        System.err.println("[ERRO DE DIGITAÇÃO] Falha no comando '" + line + "'");
                     }
                 }
             }
@@ -91,7 +106,7 @@ public class LogProcessor {
 
     private User getUserByUsername(List<User> users, String username) {
         Optional<User> user = users.stream()
-            .filter(u -> u.consultUsername() == username)
+            .filter(u -> u.consultUsername().equals(username))
             .findFirst();
         
         return user.orElse(null);
