@@ -2,6 +2,8 @@ package com.nexus.model;
 
 import java.time.LocalDate;
 
+import com.nexus.exception.NexusValidationException;
+
 public class Task {
     // Métricas Globais (Alunos implementam a lógica de incremento/decremento)
     public static int totalTasksCreated = 0;
@@ -57,4 +59,28 @@ public class Task {
     public String getTitle() { return title; }
     public LocalDate getDeadline() { return deadline; }
     public User getOwner() { return owner; }
+
+    // Setters
+    public void setStatus(TaskStatus status) {
+        boolean valid = true;
+        switch (status) {
+            case IN_PROGRESS:
+                valid = this.owner != null;   
+                break;
+            case DONE:
+                valid = this.status != TaskStatus.BLOCKED;
+                break;
+            case BLOCKED:
+                valid = this.status != TaskStatus.DONE;
+            default:
+                break;
+        }
+            
+        if (!valid) {
+            totalValidationErrors++;
+            throw new NexusValidationException("Erro ao mudar status da tarefa " + this.title + ": " + this.status.name() + " -> " + status.name());
+        }
+
+        this.status = status;
+    }
 }
